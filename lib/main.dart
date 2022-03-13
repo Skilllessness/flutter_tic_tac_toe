@@ -61,6 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  var tiles = List.filled(9, 0);
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -73,43 +75,102 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("Sanjiv's App"),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: Row(children: [
+        AspectRatio(
+          aspectRatio: 1,
+          child: GridView.count(
+            crossAxisCount: 3,
+            children: [
+              for (var i = 0; i < 9; i++)
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      tiles[i] = 1;
+                      runAi();
+                    });
+                  },
+                  child: Text(
+                    tiles[i] == 0
+                        ? ''
+                        : tiles[i] == 1
+                            ? 'X'
+                            : 'O',
+                  ),
+                ),
+            ],
+          ),
         ),
-      ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text(isWinning(1, tiles)
+                ? "You won!"
+                : isWinning(2, tiles)
+                    ? "You lost!"
+                    : "Your Move"),
+            OutlinedButton(
+              onPressed: () {
+                setState(() {
+                  tiles = List.filled(9, 0);
+                });
+              },
+              child: Text("Restart"),
+            )
+          ],
+        )
+      ]),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void runAi() async {
+    await Future.delayed(Duration(milliseconds: 200));
+    int? winning;
+    int? blocking;
+    int? normal;
+
+    for (var i = 0; i < 9; i++) {
+      var val = tiles[i];
+
+      if (val > 0) {
+        continue;
+      }
+      var future = [...tiles]..[i] = 1;
+      if (isWinning(2, future)) {
+        winning = i;
+      }
+
+      future[i] = 1;
+
+      if (isWinning(1, future)) {
+        blocking = i;
+      }
+
+      normal = i;
+    }
+
+    var move = winning ?? blocking ?? normal;
+    if (move != null) {
+      setState(() {
+        tiles[move] = 2;
+      });
+    }
+  }
+
+  bool isWinning(int who, List<int> future) {
+    return (tiles[0] == who || tiles[1] == who || tiles[2] == who) ||
+        (tiles[3] == who || tiles[4] == who || tiles[5] == who) ||
+        (tiles[6] == who || tiles[7] == who || tiles[8] == who) ||
+        (tiles[0] == who || tiles[4] == who || tiles[8] == who) ||
+        (tiles[2] == who || tiles[4] == who || tiles[6] == who) ||
+        (tiles[0] == who || tiles[3] == who || tiles[6] == who) ||
+        (tiles[1] == who || tiles[4] == who || tiles[7] == who) ||
+        (tiles[2] == who || tiles[5] == who || tiles[8] == who);
   }
 }
