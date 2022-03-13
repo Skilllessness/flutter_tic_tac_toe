@@ -31,71 +31,107 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var tiles = List.filled(9, 0);
 
+  GameState get currentState {
+    return isWinning(1, tiles)
+        ? GameState.playerWon
+        : isWinning(2, tiles)
+            ? GameState.aiWon
+            : tiles.any((element) => element == 0)
+                ? GameState.playing
+                : GameState.draw;
+  }
+
   @override
   Widget build(BuildContext context) {
+    String gameStateText;
+    switch (currentState) {
+      case GameState.playerWon:
+        gameStateText = 'You Won';
+        break;
+      case GameState.aiWon:
+        gameStateText = 'You Lost!';
+        break;
+      case GameState.playing:
+        gameStateText = 'Your move';
+        break;
+      case GameState.draw:
+        gameStateText = 'Game Drawn';
+        break;
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "Skilllessness Tic TAc Toe",
         ),
       ),
-      body: Row(
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: GridView.count(
-              crossAxisCount: 3,
-              children: [
-                for (var i = 0; i < 9; i++)
-                  Material(
-                    color: tiles[i] == 0
-                        ? Colors.white
-                        : tiles[i] == 1
-                            ? Colors.green
-                            : Colors.yellow,
-                    child: InkWell(
-                      onTap: tiles[i] == 0
-                          ? () {
-                              setState(() {
-                                tiles[i] = 1;
-                                runAi();
-                              });
-                            }
-                          : null,
-                      child: Center(
-                        child: Text(
-                          tiles[i] == 0
-                              ? ''
-                              : tiles[i] == 1
-                                  ? 'X'
-                                  : 'O',
-                          style: const TextStyle(fontSize: 40),
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          final children = [
+            AspectRatio(
+              aspectRatio: 1,
+              child: GridView.count(
+                crossAxisCount: 3,
+                children: [
+                  for (var i = 0; i < 9; i++)
+                    Material(
+                      color: tiles[i] == 0
+                          ? Colors.white
+                          : tiles[i] == 1
+                              ? Colors.green
+                              : Colors.yellow,
+                      child: InkWell(
+                        onTap:
+                            (currentState == GameState.playing && tiles[i] == 0)
+                                ? () {
+                                    setState(() {
+                                      tiles[i] = 1;
+                                      if (!isWinning(1, tiles)) {
+                                        runAi();
+                                      }
+                                    });
+                                  }
+                                : null,
+                        child: Center(
+                          child: Text(
+                            tiles[i] == 0
+                                ? ''
+                                : tiles[i] == 1
+                                    ? 'X'
+                                    : 'O',
+                            style: const TextStyle(fontSize: 40),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Text(isWinning(1, tiles)
-                  ? "You won!"
-                  : isWinning(2, tiles)
-                      ? "You lost!"
-                      : "Your Move"),
-              OutlinedButton(
-                onPressed: () {
-                  setState(() {
-                    tiles = List.filled(9, 0);
-                  });
-                },
-                child: const Text("Restart"),
-              )
-            ],
-          )
-        ],
+            Flexible(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(gameStateText),
+                  OutlinedButton(
+                    onPressed: () {
+                      setState(() {
+                        tiles = List.filled(9, 0);
+                      });
+                    },
+                    child: const Text("Restart"),
+                  )
+                ],
+              ),
+            )
+          ];
+          if (orientation == Orientation.landscape) {
+            return Row(
+              children: children,
+            );
+          }
+          return Column(
+            children: children,
+          );
+        },
       ),
     );
   }
@@ -146,4 +182,11 @@ class _MyHomePageState extends State<MyHomePage> {
         (tiles[1] == who && tiles[4] == who && tiles[7] == who) ||
         (tiles[2] == who && tiles[5] == who && tiles[8] == who);
   }
+}
+
+enum GameState {
+  playing,
+  draw,
+  playerWon,
+  aiWon,
 }
