@@ -47,19 +47,21 @@ class _MyHomePageState extends State<MyHomePage> {
               crossAxisCount: 3,
               children: [
                 for (var i = 0; i < 9; i++)
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        tiles[i] = 1;
-                        runAi();
-                      });
-                    },
-                    child: Container(
-                      color: tiles[i] == 0
-                          ? Colors.white
-                          : tiles[i] == 1
-                              ? Colors.green
-                              : Colors.yellow,
+                  Material(
+                    color: tiles[i] == 0
+                        ? Colors.white
+                        : tiles[i] == 1
+                            ? Colors.green
+                            : Colors.yellow,
+                    child: InkWell(
+                      onTap: tiles[i] == 0
+                          ? () {
+                              setState(() {
+                                tiles[i] = 1;
+                                runAi();
+                              });
+                            }
+                          : null,
                       child: Center(
                         child: Text(
                           tiles[i] == 0
