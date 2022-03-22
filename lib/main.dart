@@ -66,76 +66,91 @@ class _MyHomePageState extends State<MyHomePage> {
           "Skilllessness Tic Tac Toe",
         ),
       ),
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          final children = [
-            AspectRatio(
-              aspectRatio: 1,
-              child: GridView.count(
-                crossAxisCount: 3,
-                children: [
-                  for (var i = 0; i < 9; i++)
-                    Material(
-                      color: tiles[i] == 0
-                          ? Colors.white
-                          : tiles[i] == 1
-                              ? Colors.green
-                              : Colors.yellow,
-                      child: InkWell(
-                        onTap:
-                            (currentState == GameState.playing && tiles[i] == 0)
-                                ? () {
-                                    if (isPlayersTurn) {
-                                      setState(() {
-                                        tiles[i] = 1;
-                                        if (!isWinning(1, tiles)) {
-                                          runAi();
-                                        }
-                                      });
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: OrientationBuilder(
+          builder: (context, orientation) {
+            final children = [
+              Expanded(
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: GridView.count(
+                      crossAxisCount: 3,
+                      children: [
+                        for (var i = 0; i < 9; i++)
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1,
+                              ),
+                              color: tiles[i] == 0
+                                  ? Colors.white
+                                  : tiles[i] == 1
+                                      ? Colors.green
+                                      : Colors.yellow,
+                            ),
+                            child: InkWell(
+                              onTap: (currentState == GameState.playing &&
+                                      tiles[i] == 0)
+                                  ? () {
+                                      if (isPlayersTurn) {
+                                        setState(() {
+                                          tiles[i] = 1;
+                                          if (!isWinning(1, tiles)) {
+                                            runAi();
+                                          }
+                                        });
+                                      }
                                     }
-                                  }
-                                : null,
-                        child: Center(
-                          child: Text(
-                            tiles[i] == 0
-                                ? ''
-                                : tiles[i] == 1
-                                    ? 'X'
-                                    : 'O',
-                            style: const TextStyle(fontSize: 40),
+                                  : null,
+                              child: Center(
+                                child: Text(
+                                  tiles[i] == 0
+                                      ? ''
+                                      : tiles[i] == 1
+                                          ? 'X'
+                                          : 'O',
+                                  style: const TextStyle(fontSize: 40),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
-            ),
-            Flexible(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text(gameStateText),
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        tiles = List.filled(9, 0);
-                      });
-                    },
-                    child: const Text("Restart"),
-                  )
-                ],
-              ),
-            )
-          ];
-          if (orientation == Orientation.landscape) {
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(gameStateText),
+                    OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          tiles = List.filled(9, 0);
+                        });
+                      },
+                      child: const Text("Restart"),
+                    )
+                  ],
+                ),
+              )
+            ];
+            if (orientation == Orientation.portrait) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: children,
+              );
+            }
             return Row(
               children: children,
             );
-          }
-          return Column(
-            children: children,
-          );
-        },
+          },
+        ),
       ),
     );
   }
