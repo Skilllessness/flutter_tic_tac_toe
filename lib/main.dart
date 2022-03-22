@@ -41,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 : GameState.draw;
   }
 
+  bool isPlayersTurn = true;
+
   @override
   Widget build(BuildContext context) {
     String gameStateText;
@@ -61,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Skilllessness Tic TAc Toe",
+          "Skilllessness Tic Tac Toe",
         ),
       ),
       body: OrientationBuilder(
@@ -83,12 +85,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         onTap:
                             (currentState == GameState.playing && tiles[i] == 0)
                                 ? () {
-                                    setState(() {
-                                      tiles[i] = 1;
-                                      if (!isWinning(1, tiles)) {
-                                        runAi();
-                                      }
-                                    });
+                                    if (isPlayersTurn) {
+                                      setState(() {
+                                        tiles[i] = 1;
+                                        if (!isWinning(1, tiles)) {
+                                          runAi();
+                                        }
+                                      });
+                                    }
                                   }
                                 : null,
                         child: Center(
@@ -137,6 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void runAi() async {
+    isPlayersTurn = false;
     await Future.delayed(const Duration(milliseconds: 200));
     int? winning;
     int? blocking;
@@ -148,12 +153,16 @@ class _MyHomePageState extends State<MyHomePage> {
       if (val > 0) {
         continue;
       }
-      var future = [...tiles]..[i] = 1;
+
+      // assign potential future cpu's move
+      var future = [...tiles];
+      future[i] = 2;
       // If we/AI is winning
       if (isWinning(2, future)) {
         winning = i;
       }
 
+      // assign potential future player's move
       future[i] = 1;
 
       // If Player is winning.
@@ -170,17 +179,19 @@ class _MyHomePageState extends State<MyHomePage> {
         tiles[move] = 2;
       });
     }
+
+    isPlayersTurn = true;
   }
 
   bool isWinning(int who, List<int> future) {
-    return (tiles[0] == who && tiles[1] == who && tiles[2] == who) ||
-        (tiles[3] == who && tiles[4] == who && tiles[5] == who) ||
-        (tiles[6] == who && tiles[7] == who && tiles[8] == who) ||
-        (tiles[0] == who && tiles[4] == who && tiles[8] == who) ||
-        (tiles[2] == who && tiles[4] == who && tiles[6] == who) ||
-        (tiles[0] == who && tiles[3] == who && tiles[6] == who) ||
-        (tiles[1] == who && tiles[4] == who && tiles[7] == who) ||
-        (tiles[2] == who && tiles[5] == who && tiles[8] == who);
+    return (future[0] == who && future[1] == who && future[2] == who) ||
+        (future[3] == who && future[4] == who && future[5] == who) ||
+        (future[6] == who && future[7] == who && future[8] == who) ||
+        (future[0] == who && future[4] == who && future[8] == who) ||
+        (future[2] == who && future[4] == who && future[6] == who) ||
+        (future[0] == who && future[3] == who && future[6] == who) ||
+        (future[1] == who && future[4] == who && future[7] == who) ||
+        (future[2] == who && future[5] == who && future[8] == who);
   }
 }
 
